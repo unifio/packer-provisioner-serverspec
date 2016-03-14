@@ -1,0 +1,98 @@
+{
+	"ImportPath": "github.com/unifio/packer-provisioner-serverspec",
+	"GoVersion": "go1.5",
+	"Deps": [
+		{
+			"ImportPath": "github.com/hashicorp/errwrap",
+			"Rev": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/go-multierror",
+			"Rev": "d30f09973e19c1dfcd120b2d9c4f168e68d6b5d5"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/go-version",
+			"Rev": "2e7f5ea8e27bb3fdf9baa0881d16757ac4637332"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/yamux",
+			"Rev": "df949784da9ed028ee76df44652e42d37a09d7e4"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/go-fs",
+			"Rev": "a34c1b9334e86165685a9449b782f20465eb8c69"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/go-fs/fat",
+			"Rev": "a34c1b9334e86165685a9449b782f20465eb8c69"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/iochan",
+			"Rev": "87b45ffd0e9581375c491fef3d32130bb15c5bd7"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/mapstructure",
+			"Rev": "d2dd0262208475919e1a362f675cfc0e7c10e905"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/multistep",
+			"Rev": "162146fc57112954184d90266f4733e900ed05a5"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/common",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/common/uuid",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/helper/config",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/packer",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/packer/plugin",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/packer/rpc",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/template",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/packer/template/interpolate",
+			"Comment": "v0.9.0",
+			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/reflectwalk",
+			"Rev": "eecf4c70c626c7cfbb95c90195bc34d386c74ac6"
+		},
+		{
+			"ImportPath": "github.com/ugorji/go/codec",
+			"Rev": "187fa0f8af224437e08ecb3f208c4d1a94859a61"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "de93d05161db39bcbd84d3da2e54c4a18f37f0b1"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "de93d05161db39bcbd84d3da2e54c4a18f37f0b1"
+		}
+	]
+}
