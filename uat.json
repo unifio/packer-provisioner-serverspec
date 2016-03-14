@@ -1,0 +1,18 @@
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "source_ami": "ami-63b25203",
+    "region": "us-west-2",
+    "instance_type": "m3.medium",
+    "communicator": "ssh",
+    "ssh_username": "ec2-user",
+    "ami_name": "fabric-provisioner-uat-{{isotime \"20060102-150405\"}}",
+    "ami_description": "Automated acceptance test for Fabric provisioner",
+    "ami_virtualization_type": "hvm"
+  }],
+  "provisioners": [{
+    "type": "fabric",
+    "fab_file": "fabfile.py",
+    "fab_tasks": "test"
+  }]
+}

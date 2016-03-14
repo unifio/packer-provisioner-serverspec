@@ -1,0 +1,28 @@
+machine:
+  environment:
+    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+    PKR_VERSION: 0.9.0
+    PKR_URL: https://releases.hashicorp.com/packer/${PKR_VERSION}/packer_${PKR_VERSION}_linux_amd64.zip
+
+dependencies:
+  pre:
+    - go get github.com/tools/godep
+    - sudo pip install fabric
+
+  override:
+    - mkdir -p "/home/ubuntu/.go_workspace/src/$IMPORT_PATH"
+    - rsync -azC --delete ./ "/home/ubuntu/.go_workspace/src/$IMPORT_PATH/"
+    - cd /home/ubuntu/.go_workspace/src/$IMPORT_PATH && godep go test && godep go install
+
+test:
+  pre:
+    - "[[ -f \"${HOME}/bin/packer\" ]] || (wget -O \"/tmp/pkr.zip\" \"${PKR_URL}\" && unzip -o -d \"${HOME}/bin\" \"/tmp/pkr.zip\")"
+    - cp /home/ubuntu/.go_workspace/bin/packer-provisioner-fabric ${HOME}/bin
+    - packer version
+
+  override:
+    - cd uat && packer build uat.json
+
+general:
+  artifacts:
+    - /home/ubuntu/.go_workspace/bin/packer-provisioner-fabric
