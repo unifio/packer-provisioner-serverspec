@@ -1,4 +1,7 @@
 machine:
+  ruby:
+    version: 2.0.0-p645
+
   environment:
     IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
     PKR_VERSION: 0.9.0
@@ -7,7 +10,6 @@ machine:
 dependencies:
   pre:
     - go get github.com/tools/godep
-    - sudo pip install fabric
 
   override:
     - mkdir -p "/home/ubuntu/.go_workspace/src/$IMPORT_PATH"
@@ -17,12 +19,13 @@ dependencies:
 test:
   pre:
     - "[[ -f \"${HOME}/bin/packer\" ]] || (wget -O \"/tmp/pkr.zip\" \"${PKR_URL}\" && unzip -o -d \"${HOME}/bin\" \"/tmp/pkr.zip\")"
-    - cp /home/ubuntu/.go_workspace/bin/packer-provisioner-fabric ${HOME}/bin
+    - cp /home/ubuntu/.go_workspace/bin/packer-provisioner-serverspec ${HOME}/bin
     - packer version
+    - cd uat && bundle install
 
   override:
     - cd uat && packer build uat.json
 
 general:
   artifacts:
-    - /home/ubuntu/.go_workspace/bin/packer-provisioner-fabric
+    - /home/ubuntu/.go_workspace/bin/packer-provisioner-serverspec

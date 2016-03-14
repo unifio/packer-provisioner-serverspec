@@ -6,13 +6,14 @@
     "instance_type": "m3.medium",
     "communicator": "ssh",
     "ssh_username": "ec2-user",
-    "ami_name": "fabric-provisioner-uat-{{isotime \"20060102-150405\"}}",
-    "ami_description": "Automated acceptance test for Fabric provisioner",
+    "ami_name": "serverspec-provisioner-uat-{{isotime \"20060102-150405\"}}",
+    "ami_description": "Automated acceptance test for Serverspec provisioner",
     "ami_virtualization_type": "hvm"
   }],
   "provisioners": [{
-    "type": "fabric",
-    "fab_file": "fabfile.py",
-    "fab_tasks": "test"
+    "type": "serverspec",
+    "rake_file": "Rakefile",
+    "rake_task": "serverspec:all",
+    "rake_env_vars": "$BUNDLE_GEMFILE=Gemfile"
   }]
 }
