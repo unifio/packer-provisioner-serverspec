@@ -12,7 +12,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 )
 
-// Be sure to remove the Fabric stub file in each test with:
+// Be sure to remove the Rakefile stub file in each test with:
 //   defer os.Remove(config["command"].(string))
 func testConfig(t *testing.T) map[string]interface{} {
 	m := make(map[string]interface{})
@@ -20,13 +20,13 @@ func testConfig(t *testing.T) map[string]interface{} {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	fabric_stub := path.Join(wd, "packer-fabric-stub.sh")
+	rake_stub := path.Join(wd, "packer-rake-stub.sh")
 
-	err = ioutil.WriteFile(fabric_stub, []byte("#!/usr/bin/env bash\necho -e \"Fabric 1.10.2\nParamiko 1.16.0\""), 0777)
+	err = ioutil.WriteFile(rake_stub, []byte("#!/usr/bin/env bash\necho -e \"This is Rake!\""), 0777)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	m["command"] = fabric_stub
+	m["command"] = rake_stub
 
 	return m
 }
@@ -61,22 +61,23 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	}
 	defer os.Remove(publickey_file.Name())
 
-	fab_file, err := ioutil.TempFile("", "fabfile")
+	rake_file, err := ioutil.TempFile("", "Rakefile")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.Remove(fab_file.Name())
+	defer os.Remove(rake_file.Name())
 
 	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["ssh_authorized_key_file"] = publickey_file.Name()
-	config["fab_file"] = fab_file.Name()
+	config["rake_file"] = rake_file.Name()
+	config["rake_task"] = "test"
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
-func TestProvisionerPrepare_FabFile(t *testing.T) {
+func TestProvisionerPrepare_RakeFile(t *testing.T) {
 	var p Provisioner
 	config := testConfig(t)
 	defer os.Remove(config["command"].(string))
@@ -101,13 +102,14 @@ func TestProvisionerPrepare_FabFile(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	fab_file, err := ioutil.TempFile("", "fabfile")
+	rake_file, err := ioutil.TempFile("", "Rakefile")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.Remove(fab_file.Name())
+	defer os.Remove(rake_file.Name())
 
-	config["fab_file"] = fab_file.Name()
+	config["rake_file"] = rake_file.Name()
+	config["rake_task"] = "test"
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -125,11 +127,11 @@ func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 	}
 	defer os.Remove(publickey_file.Name())
 
-	fab_file, err := ioutil.TempFile("", "fabfile")
+	rake_file, err := ioutil.TempFile("", "Rakefile")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.Remove(fab_file.Name())
+	defer os.Remove(rake_file.Name())
 
 	filename := make([]byte, 10)
 	n, err := io.ReadFull(rand.Reader, filename)
@@ -139,7 +141,8 @@ func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 
 	config["ssh_host_key_file"] = fmt.Sprintf("%x", filename)
 	config["ssh_authorized_key_file"] = publickey_file.Name()
-	config["fab_file"] = fab_file.Name()
+	config["rake_file"] = rake_file.Name()
+	config["rake_task"] = "test"
 
 	err = p.Prepare(config)
 	if err == nil {
@@ -170,11 +173,11 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	}
 	defer os.Remove(hostkey_file.Name())
 
-	fab_file, err := ioutil.TempFile("", "fabfile")
+	rake_file, err := ioutil.TempFile("", "Rakefile")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.Remove(fab_file.Name())
+	defer os.Remove(rake_file.Name())
 
 	filename := make([]byte, 10)
 	n, err := io.ReadFull(rand.Reader, filename)
@@ -183,7 +186,8 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	}
 
 	config["ssh_host_key_file"] = hostkey_file.Name()
-	config["fab_file"] = fab_file.Name()
+	config["rake_file"] = rake_file.Name()
+	config["rake_task"] = "test"
 	config["ssh_authorized_key_file"] = fmt.Sprintf("%x", filename)
 
 	err = p.Prepare(config)
@@ -221,15 +225,16 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 	}
 	defer os.Remove(publickey_file.Name())
 
-	fab_file, err := ioutil.TempFile("", "fabfile")
+	rake_file, err := ioutil.TempFile("", "Rakefile")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.Remove(fab_file.Name())
+	defer os.Remove(rake_file.Name())
 
 	config["ssh_host_key_file"] = hostkey_file.Name()
 	config["ssh_authorized_key_file"] = publickey_file.Name()
-	config["fab_file"] = fab_file.Name()
+	config["rake_file"] = rake_file.Name()
+	config["rake_task"] = "test"
 
 	config["local_port"] = "65537"
 	err = p.Prepare(config)

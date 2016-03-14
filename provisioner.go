@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -33,29 +32,28 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
 
-	// The command to run fabric
-	Command string
+	// The command to run serverspec
+	Command string `mapstructure:"command"`
 
-	// Extra options to pass to the fabric command
+	// Extra options to pass to the serverspec command
 	ExtraArguments []string `mapstructure:"extra_arguments"`
 
-	FabricEnvVars []string `mapstructure:"fabric_env_vars"`
+	RakeEnvVars []string `mapstructure:"rake_env_vars"`
 
-	// The main Fab file to execute.
-	FabFile              string   `mapstructure:"fab_file"`
-	FabTasks             string   `mapstructure:"fab_tasks"`
+	// The main Rakefile to execute.
+	RakeFile             string   `mapstructure:"rake_file"`
+	RakeTask             string   `mapstructure:"rake_task"`
 	User                 string   `mapstructure:"user"`
 	LocalPort            string   `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
+	SFTPCmd              string   `mapstructure:"sftp_command"`
 }
 
 type Provisioner struct {
 	config        Config
 	adapter       *adapter
 	done          chan struct{}
-	fabVersion    string
-	fabMajVersion uint
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -74,11 +72,15 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Defaults
 	if p.config.Command == "" {
-		p.config.Command = "fab"
+		p.config.Command = "rake"
 	}
 
 	var errs *packer.MultiError
-	err = validateFileConfig(p.config.FabFile, "fab_file", true)
+	if p.config.RakeTask == "" {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("rake_task must not be empty"))
+	}
+	err = validateFileConfig(p.config.RakeFile, "rake_file", true)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
@@ -107,11 +109,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.LocalPort = "0"
 	}
 
-	err = p.getVersion()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
-
 	if p.config.User == "" {
 		p.config.User = os.Getenv("USER")
 	}
@@ -125,34 +122,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) getVersion() error {
-	out, err := exec.Command(p.config.Command, "--version").Output()
-	if err != nil {
-		return err
-	}
-
-	versionRe := regexp.MustCompile(`Fabric (\d+\.\d+[.\d+]*)`)
-	matches := versionRe.FindStringSubmatch(string(out))
-	if matches == nil {
-		return fmt.Errorf(
-			"Could not find %s version in output:\n%s", p.config.Command, string(out))
-	}
-
-	version := matches[1]
-	log.Printf("%s version: %s", p.config.Command, version)
-	p.fabVersion = version
-
-	majVer, err := strconv.ParseUint(strings.Split(version, ".")[0], 10, 0)
-	if err != nil {
-		return fmt.Errorf("Could not parse major version from \"%s\".", version)
-	}
-	p.fabMajVersion = uint(majVer)
-
-	return nil
-}
-
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
-	ui.Say("Provisioning with Fabric...")
+	ui.Say("Provisioning with Serverspec...")
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
 	if err != nil {
@@ -223,7 +194,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui = newUi(ui)
-	p.adapter = newAdapter(p.done, localListener, config, "", ui, comm)
+	p.adapter = newAdapter(p.done, localListener, config, p.config.SFTPCmd, ui, comm)
 
 	defer func() {
 		ui.Say("shutting down the SSH proxy")
@@ -233,8 +204,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	go p.adapter.Serve()
 
-	if err := p.executeFabric(ui, comm, k.privKeyFile, !hostSigner.generated); err != nil {
-		return fmt.Errorf("Error executing Fabric: %s", err)
+	if err := p.executeRake(ui, comm, k.privKeyFile, !hostSigner.generated); err != nil {
+		return fmt.Errorf("Error executing Serverspec: %s", err)
 	}
 
 	return nil
@@ -250,24 +221,25 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func (p *Provisioner) executeFabric(ui packer.Ui, comm packer.Communicator, privKeyFile string, checkHostKey bool) error {
-  fabfile, _ := filepath.Abs(p.config.FabFile)
-	hoststring := fmt.Sprintf("%s@127.0.0.1:%s",
-		p.config.User, p.config.LocalPort)
-	var envvars []string
+func (p *Provisioner) executeRake(ui packer.Ui, comm packer.Communicator, privKeyFile string, checkHostKey bool) error {
+  rakefile, _ := filepath.Abs(p.config.RakeFile)
 
-	args := []string{"-f", fabfile, "-H", hoststring}
-	if len(privKeyFile) > 0 {
-		args = append(args, "-i", privKeyFile)
-	}
-	if !checkHostKey {
-		args = append(args, "--disable-known-hosts")
-	}
+	args := []string{"-f", rakefile}
 	args = append(args, p.config.ExtraArguments...)
-	args = append(args, p.config.FabTasks)
+	args = append(args, p.config.RakeTask)
 
-	if len(p.config.FabricEnvVars) > 0 {
-		envvars = append(envvars, p.config.FabricEnvVars...)
+  var envvars []string
+	envvars = append(envvars, "TARGET_HOST=127.0.0.1")
+	envvars = append(envvars, fmt.Sprintf("TARGET_PORT=%s", p.config.LocalPort))
+	envvars = append(envvars, fmt.Sprintf("TARGET_USER=%s", p.config.User))
+	if !checkHostKey {
+		envvars = append(envvars, "SERVERSPEC_HOST_KEY_CHECKING=false")
+	}
+	if len(privKeyFile) > 0 {
+		envvars = append(envvars, fmt.Sprintf("TARGET_KEY=%s", privKeyFile))
+	}
+	if len(p.config.RakeEnvVars) > 0 {
+		envvars = append(envvars, p.config.RakeEnvVars...)
 	}
 
 	cmd := exec.Command(p.config.Command, args...)
@@ -301,7 +273,7 @@ func (p *Provisioner) executeFabric(ui packer.Ui, comm packer.Communicator, priv
 	go repeat(stdout)
 	go repeat(stderr)
 
-	ui.Say(fmt.Sprintf("Executing Fabric: %s", strings.Join(cmd.Args, " ")))
+	ui.Say(fmt.Sprintf("Executing Serverspec: %s", strings.Join(cmd.Args, " ")))
 	cmd.Start()
 	wg.Wait()
 	err = cmd.Wait()
@@ -356,7 +328,7 @@ func newUserKey(pubKeyFile string) (*userKey, error) {
 		return nil, errors.New("Failed to extract public key from generated key pair")
 	}
 
-	// To support Fabric calling back to us we need to write
+	// To support Serverspec calling back to us we need to write
 	// this file down
 	privateKeyDer := x509.MarshalPKCS1PrivateKey(key)
 	privateKeyBlock := pem.Block{
@@ -364,7 +336,7 @@ func newUserKey(pubKeyFile string) (*userKey, error) {
 		Headers: nil,
 		Bytes:   privateKeyDer,
 	}
-	tf, err := ioutil.TempFile("", "fabric-key")
+	tf, err := ioutil.TempFile("", "serverspec-key")
 	if err != nil {
 		return nil, errors.New("failed to create temp file for generated key")
 	}
