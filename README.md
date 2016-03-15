@@ -40,6 +40,26 @@ Add the provisioner to your packer template:
 }
 ```
 
+The connection to the builder is facilitated via a local SSH proxy. The integration requires that your `spec_helper` minimally exposes the following parameters:
+
+```ruby
+require 'serverspec'
+require 'net/ssh'
+
+options = Net::SSH::Config.for(host, [])
+options[:user] = ENV['TARGET_USER']
+options[:keys] = ENV['TARGET_KEY']
+options[:host_name] = ENV['TARGET_HOST']
+options[:port] = ENV['TARGET_PORT']
+options[:paranoid] = false unless ENV['SERVERSPEC_HOST_KEY_CHECKING'] =~ (/^(true|t|yes|y|1)$/i)
+
+set :host,         options[:host_name]
+set :ssh_options,  options
+set :backend,      :ssh
+set :display_sudo, true
+set :request_pty,  true
+```
+
 Configuration
 -------------
 
@@ -52,6 +72,12 @@ The relative path to the Rakefile to be utilized.
 ### rake_task
 
 Rake task to be executed.
+
+### command (optional)
+
+Command to be used to execute Serverspec. Defaults to `rake`.
+
+** Note: `bundle exec` will not work if passed into the `command` parameter. If you want to achieve the same context isolation, add `require 'bundler/setup'` to your Rakefile and pass `$BUNDLE_GEMFILE` to the `rake_env_vars` parameter as illustrated in the example above.
 
 ### user (optional)
 
