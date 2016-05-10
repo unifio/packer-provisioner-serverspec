@@ -1,6 +1,7 @@
 {
 	"ImportPath": "github.com/unifio/packer-provisioner-serverspec",
-	"GoVersion": "go1.5",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v62",
 	"Deps": [
 		{
 			"ImportPath": "github.com/hashicorp/errwrap",
@@ -16,7 +17,7 @@
 		},
 		{
 			"ImportPath": "github.com/hashicorp/yamux",
-			"Rev": "df949784da9ed028ee76df44652e42d37a09d7e4"
+			"Rev": "c8a8a076e0858546ae6e2ee189d94e78b9b881ce"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/go-fs",
@@ -40,43 +41,43 @@
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/common",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/common/uuid",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/helper/config",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/packer",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/packer/plugin",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/packer/rpc",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/template",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/packer/template/interpolate",
-			"Comment": "v0.9.0",
-			"Rev": "a643faae672ec8b8424352476d2b91b7a7f7b06e"
+			"Comment": "v0.10.1",
+			"Rev": "4e5f65131b5491ab44ff8aa0626abe4a85597ac0"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/reflectwalk",
@@ -84,15 +85,15 @@
 		},
 		{
 			"ImportPath": "github.com/ugorji/go/codec",
-			"Rev": "187fa0f8af224437e08ecb3f208c4d1a94859a61"
+			"Rev": "a396ed22fc049df733440d90efe17475e3929ccb"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "de93d05161db39bcbd84d3da2e54c4a18f37f0b1"
+			"Rev": "285fb2ed20d1dc450fc743a1b3ff7c36bef372b9"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "de93d05161db39bcbd84d3da2e54c4a18f37f0b1"
+			"Rev": "285fb2ed20d1dc450fc743a1b3ff7c36bef372b9"
 		}
 	]
 }
