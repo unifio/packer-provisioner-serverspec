@@ -11,5 +11,5 @@ options[:paranoid] = false unless ENV['SERVERSPEC_HOST_KEY_CHECKING'] =~ (/^(tru
 set :host,         options[:host_name]
 set :ssh_options,  options
 set :backend,      :ssh
-set :disable_sudo, true
+set :disable_sudo, false
 set :request_pty,  true
