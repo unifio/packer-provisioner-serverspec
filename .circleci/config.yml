@@ -1,0 +1,69 @@
+version: 2
+
+default: &default
+  working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+
+jobs:
+  go-build:
+    <<: *default
+
+    docker:
+      - image: circleci/golang:1.10
+
+    steps:
+      - checkout
+
+      - run:
+          name: go build
+          command: |
+            go get github.com/tools/godep
+            godep go test
+            godep go build
+
+      - persist_to_workspace:
+          root: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+          paths:
+            - packer-provisioner-serverspec
+
+  packer-build:
+    <<: *default
+
+    docker:
+      - image: circleci/ruby:2.3.0
+
+    environment:
+      IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+      PKR_VERSION: 0.10.1
+      PKR_URL: https://releases.hashicorp.com/packer/${PKR_VERSION}/packer_${PKR_VERSION}_linux_amd64.zip
+
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+
+      - run:
+          name: Setup packer
+          command: |
+            mkdir -p "$HOME/bin"
+            mkdir -p "$HOME/.packer.d/plugins"
+            wget -O "/tmp/pkr.zip" "${PKR_URL}"
+            unzip -o -d "${HOME}/bin" "/tmp/pkr.zip"
+            mv packer-provisioner-serverspec $HOME/.packer.d/plugins
+
+      - run:
+          name: packer build
+          command: |
+            cd uat
+            bundle install
+            packer build uat.json
+
+workflows:
+  version: 2
+
+  build:
+    jobs:
+      - go-build
+      - packer-build:
+          requires:
+            - go-build
