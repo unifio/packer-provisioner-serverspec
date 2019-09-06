@@ -5,10 +5,12 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/go-fs"
 	"math"
+	"strings"
 	"time"
 	"unicode/utf16"
+
+	"github.com/mitchellh/go-fs"
 )
 
 type DirectoryAttr uint8
@@ -125,7 +127,7 @@ func NewDirectoryCluster(start uint32, parent uint32, t time.Time) *DirectoryClu
 
 	// Create the "." and ".." entries
 	cluster.entries = []*DirectoryClusterEntry{
-		&DirectoryClusterEntry{
+		{
 			accessTime: t,
 			attr:       AttrDirectory,
 			cluster:    start,
@@ -133,7 +135,7 @@ func NewDirectoryCluster(start uint32, parent uint32, t time.Time) *DirectoryClu
 			name:       ".",
 			writeTime:  t,
 		},
-		&DirectoryClusterEntry{
+		{
 			accessTime: t,
 			attr:       AttrDirectory,
 			cluster:    parent,
@@ -159,8 +161,8 @@ func NewFat16RootDirectoryCluster(bs *BootSectorCommon, label string) (*Director
 
 	// Create the volume ID entry
 	result.entries[0] = &DirectoryClusterEntry{
-		attr: AttrVolumeId,
-		name: label,
+		attr:    AttrVolumeId,
+		name:    label,
 		cluster: 0,
 	}
 
@@ -341,8 +343,8 @@ func DecodeDirectoryClusterEntry(data []byte) (*DirectoryClusterEntry, error) {
 			data[0] = 0xE5
 		}
 
-		result.name = string(data[0:8])
-		result.ext = string(data[8:11])
+		result.name = strings.TrimRight(string(data[0:8]), " ")
+		result.ext = strings.TrimRight(string(data[8:11]), " ")
 
 		// Creation time
 		createTimeTenths := data[13]
