@@ -19,6 +19,7 @@ $ mkdir $HOME/.packer.d/plugins
 $ cp $GOPATH/bin/packer-provisioner-serverspec $HOME/.packer.d/plugins
 
 ```
+
 Usage
 -----
 
