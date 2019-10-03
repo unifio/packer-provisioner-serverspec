@@ -1,0 +1,101 @@
+
+version: 2.1
+executors:
+  alpine:
+    docker:
+      - image: alpine:3.10
+    working_directory: ~/packer-provisioner-serverspec
+  golang:
+    docker:
+      - image: circleci/golang:1.13.1
+    working_directory: ~/packer-provisioner-serverspec
+    environment:
+      ALPINE_VERSION: '3.10'
+  ruby:
+    docker:
+      - image: circleci/ruby:2.5.5
+    working_directory: ~/packer-provisioner-serverspec
+    environment:
+      PACKER_VERSION: '1.4.4'
+      HASHI_KEY_URL: 'https://keybase.io/hashicorp/key.asc'
+jobs:
+  build_provisioner:
+    executor: golang
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 18.09.3
+      - run:
+          name: Build provsioner for linux and store for UAT
+          command: |
+            export USER=$(whoami)
+            go build
+            mkdir -p /workspace
+            mv packer-provisioner-serverspec* /workspace/
+      - persist_to_workspace:
+          root: /workspace
+          paths:
+            - packer-provisioner-serverspec
+  uat_provisioner:
+    executor: ruby
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace
+      - run:
+          name: Install packer and other deps
+          command: |
+            mkdir -p /tmp/build
+            cd /tmp/build
+            gem install net-ssh io-console bundler rake rspec serverspec --no-document
+            wget -O - $HASHI_KEY_URL | gpg --import
+            wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
+            wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_SHA256SUMS"
+            wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_SHA256SUMS.sig"
+            gpg --batch --verify packer_${PACKER_VERSION}_SHA256SUMS.sig packer_${PACKER_VERSION}_SHA256SUMS
+            mkdir ~/bin
+            unzip -d ~/bin packer_${PACKER_VERSION}_linux_amd64.zip
+            cp -p /workspace/packer-provisioner-serverspec ~/bin/packer-provisioner-serverspec
+      - run:
+          name: Run UAT tests
+          command: |
+            cd ~/packer-provisioner-serverspec/uat
+            CHECKPOINT_DISABLE=1
+            AWS_DEFAULT_REGION=us-east-1
+            AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            USER=$(whoami)
+            if [ -v "${AWS_DEFAULT_REGION}" ] &&  [ -v "${AWS_ACCESS_KEY_ID}" ] && [ -v "${AWS_SECRET_ACCESS_KEY}" ]; then
+              packer validate -var version=${CIRCLE_BUILD_NUM} uat-aws.json
+              packer build -var version=${CIRCLE_BUILD_NUM} uat-aws.json
+            else
+              echo "Must provide AWS UAT Credentials."
+              exit 1
+            fi
+      - deploy:
+          name: Echo the packer version
+          command: |
+            packer --version
+  release:
+    executor: golang
+    steps:
+      - checkout
+      - run: curl -sL https://git.io/goreleaser | bash
+
+workflows:
+  version: 2
+  packer_provisioner_release:
+    jobs:
+      - build_provisioner
+      - uat_provisioner:
+          requires:
+            - build_provisioner
+      - release:
+          requires:
+            - build_provisioner
+            - uat_provisioner
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
