@@ -13,7 +13,6 @@
   "provisioners": [{
     "type": "serverspec",
     "rake_file": "Rakefile",
-    "rake_task": "serverspec:all",
-    "rake_env_vars": "$BUNDLE_GEMFILE=Gemfile"
+    "rake_task": "serverspec:all"
   }]
 }

@@ -1,6 +1,5 @@
 require 'rake'
 require 'rspec/core/rake_task'
-require 'bundler/setup'
 
 task :serverspec => 'serverspec:all'
 task :default => :serverspec
