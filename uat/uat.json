@@ -1,4 +1,7 @@
 {
+  "variables": {
+    "user": "{{env `USER`}}"
+  },
   "builders": [{
     "type": "amazon-ebs",
     "source_ami": "ami-63b25203",
@@ -12,6 +15,7 @@
   }],
   "provisioners": [{
     "type": "serverspec",
+    "user": "{{user `user`}}",
     "rake_file": "Rakefile",
     "rake_task": "serverspec:all"
   }]

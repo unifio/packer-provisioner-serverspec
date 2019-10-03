@@ -30,10 +30,10 @@ jobs:
           command: |
             export USER=$(whoami)
             go build
-            mkdir -p /workspace
-            mv packer-provisioner-serverspec* /workspace/
+            mkdir -p /tmp/workspace
+            mv packer-provisioner-serverspec* /tmp/workspace/
       - persist_to_workspace:
-          root: /workspace
+          root: /tmp/workspace
           paths:
             - packer-provisioner-serverspec
   uat_provisioner:
@@ -41,7 +41,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /workspace
+          at: /tmp/workspace
       - run:
           name: Install packer and other deps
           command: |
@@ -55,7 +55,7 @@ jobs:
             gpg --batch --verify packer_${PACKER_VERSION}_SHA256SUMS.sig packer_${PACKER_VERSION}_SHA256SUMS
             mkdir ~/bin
             unzip -d ~/bin packer_${PACKER_VERSION}_linux_amd64.zip
-            cp -p /workspace/packer-provisioner-serverspec ~/bin/packer-provisioner-serverspec
+            cp -p /tmp/workspace/packer-provisioner-serverspec ~/bin/packer-provisioner-serverspec
       - run:
           name: Run UAT tests
           command: |
@@ -65,9 +65,9 @@ jobs:
             AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
             USER=$(whoami)
-            if [ -v "${AWS_DEFAULT_REGION}" ] &&  [ -v "${AWS_ACCESS_KEY_ID}" ] && [ -v "${AWS_SECRET_ACCESS_KEY}" ]; then
-              packer validate -var version=${CIRCLE_BUILD_NUM} uat-aws.json
-              packer build -var version=${CIRCLE_BUILD_NUM} uat-aws.json
+            if [ -n "${AWS_DEFAULT_REGION}" ] &&  [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ]; then
+              packer validate -var version=${CIRCLE_BUILD_NUM} uat.json
+              packer build -var version=${CIRCLE_BUILD_NUM} uat.json
             else
               echo "Must provide AWS UAT Credentials."
               exit 1
