@@ -99,3 +99,15 @@ A system-chosen port is used when `local_port` is missing or empty.
 ### sftp_command (optional)
 
 (string) - The command to run on the machine being provisioned by Packer to handle the SFTP protocol that the plug-in will use to transfer files. The command should read and write on stdin and stdout, respectively. Defaults to `/usr/lib/sftp-server -e`.
+
+Development
+------------
+
+Packer 1.5.0 Added hcl2 support. In order to autogenerate support for this. Anytime a change to the `Config` struct is made you need to do the following to build.
+
+```bash
+go install github.com/hashicorp/packer/cmd/mapstructure-to-hcl2
+go generate ./serverspec/...
+```
+
+This will regenerate the `provisioner.hcl2spec.go` file.
