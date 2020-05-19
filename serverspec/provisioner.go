@@ -1,3 +1,4 @@
+//go:generate mapstructure-to-hcl2 -type Config
 package serverspec
 
 import (
@@ -10,6 +11,13 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/adapter"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
+	"golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
 	"log"
@@ -20,13 +28,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/adapter"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
-	"golang.org/x/crypto/ssh"
 )
 
 // Config data passed from the template JSON
@@ -58,6 +59,8 @@ type Provisioner struct {
 	adapter *adapter.Adapter
 	done    chan struct{}
 }
+
+func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
@@ -125,7 +128,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with Serverspec...")
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
