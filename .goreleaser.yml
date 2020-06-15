@@ -15,6 +15,9 @@ builds:
       - arm
       - arm64
       - 386
+    ignore:
+      - goos: freebsd
+        goarch: arm64
     env:
       - CGO_ENABLED=0
 
