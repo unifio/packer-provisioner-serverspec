@@ -7,7 +7,7 @@ executors:
     working_directory: ~/packer-provisioner-serverspec
   golang:
     docker:
-      - image: circleci/golang:1.13.8
+      - image: circleci/golang:1.13.12
     working_directory: ~/packer-provisioner-serverspec
     environment:
       ALPINE_VERSION: '3.10'
@@ -16,7 +16,7 @@ executors:
       - image: circleci/ruby:2.5.5
     working_directory: ~/packer-provisioner-serverspec
     environment:
-      PACKER_VERSION: '1.5.4'
+      PACKER_VERSION: '1.6.0'
       HASHI_KEY_URL: 'https://keybase.io/hashicorp/key.asc'
 jobs:
   build_provisioner:
@@ -48,7 +48,7 @@ jobs:
             mkdir -p /tmp/build
             cd /tmp/build
             gem install net-ssh io-console bundler rake rspec serverspec --no-document
-            wget -O - $HASHI_KEY_URL | gpg --import
+            curl $HASHI_KEY_URL -o - | gpg --import
             wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
             wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_SHA256SUMS"
             wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_SHA256SUMS.sig"
@@ -105,4 +105,4 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /(?<=^[Vv]|^)(?:(?<major>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<minor>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<patch>(?:0|[1-9](?:(?:0|[1-9])+)*))(?:-(?<prerelease>(?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:0|[1-9](?:(?:0|[1-9])+)*))(?:[.](?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:0|[1-9](?:(?:0|[1-9])+)*)))*))?(?:[+](?<build>(?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:(?:0|[1-9])+))(?:[.](?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:(?:0|[1-9])+)))*))?)$/
+              only: /^v\d+\.\d+\.\d+$/
