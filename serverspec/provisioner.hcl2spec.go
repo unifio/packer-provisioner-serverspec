@@ -9,23 +9,23 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName      *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType    *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug          *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce          *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError        *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars       map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Command              *string           `mapstructure:"command" cty:"command"`
-	ExtraArguments       []string          `mapstructure:"extra_arguments" cty:"extra_arguments"`
-	RakeEnvVars          []string          `mapstructure:"rake_env_vars" cty:"rake_env_vars"`
-	RakeFile             *string           `mapstructure:"rake_file" cty:"rake_file"`
-	RakeTask             *string           `mapstructure:"rake_task" cty:"rake_task"`
-	User                 *string           `mapstructure:"user" cty:"user"`
-	LocalPort            *string           `mapstructure:"local_port" cty:"local_port"`
-	SSHHostKeyFile       *string           `mapstructure:"ssh_host_key_file" cty:"ssh_host_key_file"`
-	SSHAuthorizedKeyFile *string           `mapstructure:"ssh_authorized_key_file" cty:"ssh_authorized_key_file"`
-	SFTPCmd              *string           `mapstructure:"sftp_command" cty:"sftp_command"`
+	PackerBuildName      *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType    *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug          *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce          *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError        *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars       map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Command              *string           `mapstructure:"command" cty:"command" hcl:"command"`
+	ExtraArguments       []string          `mapstructure:"extra_arguments" cty:"extra_arguments" hcl:"extra_arguments"`
+	RakeEnvVars          []string          `mapstructure:"rake_env_vars" cty:"rake_env_vars" hcl:"rake_env_vars"`
+	RakeFile             *string           `mapstructure:"rake_file" cty:"rake_file" hcl:"rake_file"`
+	RakeTask             *string           `mapstructure:"rake_task" cty:"rake_task" hcl:"rake_task"`
+	User                 *string           `mapstructure:"user" cty:"user" hcl:"user"`
+	LocalPort            *string           `mapstructure:"local_port" cty:"local_port" hcl:"local_port"`
+	SSHHostKeyFile       *string           `mapstructure:"ssh_host_key_file" cty:"ssh_host_key_file" hcl:"ssh_host_key_file"`
+	SSHAuthorizedKeyFile *string           `mapstructure:"ssh_authorized_key_file" cty:"ssh_authorized_key_file" hcl:"ssh_authorized_key_file"`
+	SFTPCmd              *string           `mapstructure:"sftp_command" cty:"sftp_command" hcl:"sftp_command"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -45,7 +45,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"command":                    &hcldec.AttrSpec{Name: "command", Type: cty.String, Required: false},
 		"extra_arguments":            &hcldec.AttrSpec{Name: "extra_arguments", Type: cty.List(cty.String), Required: false},
