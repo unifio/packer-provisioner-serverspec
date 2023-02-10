@@ -7,7 +7,7 @@ executors:
     working_directory: ~/packer-provisioner-serverspec
   golang:
     docker:
-      - image: circleci/golang:1.13.12
+      - image: cimg/go:1.18
     working_directory: ~/packer-provisioner-serverspec
     environment:
       ALPINE_VERSION: '3.10'
