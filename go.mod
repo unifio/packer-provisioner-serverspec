@@ -4,7 +4,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.16.0
 	github.com/hashicorp/packer v1.6.0
 	github.com/zclconf/go-cty v1.12.1
-	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167
+	golang.org/x/crypto v0.6.0
 )
 
 require (
