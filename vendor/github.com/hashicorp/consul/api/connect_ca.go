@@ -17,22 +17,39 @@ type CAConfig struct {
 	// and maps).
 	Config map[string]interface{}
 
+	// State is read-only data that the provider might have persisted for use
+	// after restart or leadership transition. For example this might include
+	// UUIDs of resources it has created. Setting this when writing a
+	// configuration is an error.
+	State map[string]string
+
+	// ForceWithoutCrossSigning indicates that the CA reconfiguration should go
+	// ahead even if the current CA is unable to cross sign certificates. This
+	// risks temporary connection failures during the rollout as new leafs will be
+	// rejected by proxies that have not yet observed the new root cert but is the
+	// only option if a CA that doesn't support cross signing needs to be
+	// reconfigured or mirated away from.
+	ForceWithoutCrossSigning bool
+
 	CreateIndex uint64
 	ModifyIndex uint64
 }
 
 // CommonCAProviderConfig is the common options available to all CA providers.
 type CommonCAProviderConfig struct {
-	LeafCertTTL time.Duration
+	LeafCertTTL      time.Duration
+	SkipValidate     bool
+	CSRMaxPerSecond  float32
+	CSRMaxConcurrent int
 }
 
 // ConsulCAProviderConfig is the config for the built-in Consul CA provider.
 type ConsulCAProviderConfig struct {
 	CommonCAProviderConfig `mapstructure:",squash"`
 
-	PrivateKey     string
-	RootCert       string
-	RotationPeriod time.Duration
+	PrivateKey          string
+	RootCert            string
+	IntermediateCertTTL time.Duration
 }
 
 // ParseConsulCAConfig takes a raw config map and returns a parsed
@@ -41,7 +58,6 @@ func ParseConsulCAConfig(raw map[string]interface{}) (*ConsulCAProviderConfig, e
 	var config ConsulCAProviderConfig
 	decodeConf := &mapstructure.DecoderConfig{
 		DecodeHook:       mapstructure.StringToTimeDurationHookFunc(),
-		ErrorUnused:      true,
 		Result:           &config,
 		WeaklyTypedInput: true,
 	}
@@ -121,7 +137,7 @@ func (h *Connect) CARoots(q *QueryOptions) (*CARootList, *QueryMeta, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	defer resp.Body.Close()
+	defer closeResponseBody(resp)
 
 	qm := &QueryMeta{}
 	parseQueryMeta(resp, qm)
@@ -142,7 +158,7 @@ func (h *Connect) CAGetConfig(q *QueryOptions) (*CAConfig, *QueryMeta, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	defer resp.Body.Close()
+	defer closeResponseBody(resp)
 
 	qm := &QueryMeta{}
 	parseQueryMeta(resp, qm)
@@ -164,7 +180,7 @@ func (h *Connect) CASetConfig(conf *CAConfig, q *WriteOptions) (*WriteMeta, erro
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer closeResponseBody(resp)
 
 	wm := &WriteMeta{}
 	wm.RequestTime = rtt

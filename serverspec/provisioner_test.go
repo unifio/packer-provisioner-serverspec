@@ -9,10 +9,12 @@ import (
 	"path"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
+
 // Be sure to remove the Rakefile stub file in each test with:
-//   defer os.Remove(config["command"].(string))
+//
+//	defer os.Remove(config["command"].(string))
 func testConfig(t *testing.T) map[string]interface{} {
 	m := make(map[string]interface{})
 	wd, err := os.Getwd()
