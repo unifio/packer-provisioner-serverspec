@@ -13,7 +13,7 @@ executors:
       ALPINE_VERSION: '3.10'
   ruby:
     docker:
-      - image: circleci/ruby:2.5.5
+      - image: cimg/ruby:3.2
     working_directory: ~/packer-provisioner-serverspec
     environment:
       PACKER_VERSION: '1.8.5'
