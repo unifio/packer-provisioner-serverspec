@@ -18,7 +18,7 @@ install: build
 
 release: test
 	mkdir -p releases
-	go get github.com/mitchellh/gox
+	go install github.com/mitchellh/gox@latest
 	gox -osarch="darwin/amd64 darwin/386 linux/amd64 linux/386 windows/amd64 windows/386" --output 'dist/{{.OS}}_{{.Arch}}/{{.Dir}}'
 	zip -j releases/packer-provisioner-serverspec_darwin_386.zip    dist/darwin_386/packer-provisioner-serverspec
 	zip -j releases/packer-provisioner-serverspec_darwin_amd64.zip  dist/darwin_amd64/packer-provisioner-serverspec
