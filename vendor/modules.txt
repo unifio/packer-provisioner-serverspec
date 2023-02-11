@@ -231,6 +231,8 @@ golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
+# golang.org/x/sync v0.1.0
+## explicit
 # golang.org/x/sys v0.5.0
 ## explicit; go 1.17
 golang.org/x/sys/cpu
