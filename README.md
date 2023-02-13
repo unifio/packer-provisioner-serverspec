@@ -108,8 +108,10 @@ Development
 Packer 1.6.0 Added hcl2 support. In order to autogenerate support for this. Anytime a change to the `Config` struct is made you need to do the following to build.
 
 ```bash
-go install github.com/hashicorp/packer/cmd/mapstructure-to-hcl2
+go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
 go generate ./serverspec/...
 ```
 
 This will regenerate the `provisioner.hcl2spec.go` file.
+
+ref. https://developer.hashicorp.com/packer/guides/hcl/component-object-spec
