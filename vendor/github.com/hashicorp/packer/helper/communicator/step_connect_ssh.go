@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/ssh/terminal"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -106,8 +108,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 		pAddr = fmt.Sprintf("%s:%d", s.Config.SSHProxyHost, s.Config.SSHProxyPort)
 		if s.Config.SSHProxyUsername != "" {
 			pAuth = new(proxy.Auth)
-			pAuth.User = s.Config.SSHBastionUsername
-			pAuth.Password = s.Config.SSHBastionPassword
+			pAuth.User = s.Config.SSHProxyUsername
+			pAuth.Password = s.Config.SSHProxyPassword
 		}
 
 	}
@@ -134,6 +136,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 			log.Printf("[DEBUG] Error getting SSH address: %s", err)
 			continue
 		}
+		// store host and port in config so we can access them from provisioners
+		s.Config.SSHHost = host
 		port := s.Config.SSHPort
 		if s.SSHPort != nil {
 			port, err = s.SSHPort(state)
@@ -141,7 +145,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 				log.Printf("[DEBUG] Error getting SSH port: %s", err)
 				continue
 			}
+			s.Config.SSHPort = port
 		}
+		state.Put("communicator_config", s.Config)
 
 		// Retrieve the SSH configuration
 		sshConfig, err := s.SSHConfig(state)
@@ -204,7 +210,6 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 		}
 
 		log.Printf("[INFO] Attempting SSH connection to %s...", address)
-		log.Printf("[DEBUG] Config to %#v...", config)
 		comm, err = ssh.New(address, config)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)
@@ -242,6 +247,22 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 
 func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	auth := make([]gossh.AuthMethod, 0, 2)
+
+	if config.SSHBastionInteractive {
+		var c io.ReadWriteCloser
+		if terminal.IsTerminal(int(os.Stdin.Fd())) {
+			c = os.Stdin
+		} else {
+			tty, err := os.Open("/dev/tty")
+			if err != nil {
+				return nil, err
+			}
+			defer tty.Close()
+			c = tty
+		}
+		auth = append(auth, gossh.KeyboardInteractive(ssh.KeyboardInteractive(c)))
+	}
+
 	if config.SSHBastionPassword != "" {
 		auth = append(auth,
 			gossh.Password(config.SSHBastionPassword),

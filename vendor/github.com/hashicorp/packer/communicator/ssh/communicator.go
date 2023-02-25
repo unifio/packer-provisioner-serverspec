@@ -810,11 +810,12 @@ func (c *comm) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) er
 	// our data and has completed. Or has errored.
 	log.Println("[DEBUG] Waiting for SSH session to complete.")
 	err = session.Wait()
+	log.Printf("[DEBUG] scp stderr (length %d): %s", stderr.Len(), stderr.String())
 	if err != nil {
 		if exitErr, ok := err.(*ssh.ExitError); ok {
-			// Otherwise, we have an ExitError, meaning we can just read
-			// the exit status
-			log.Printf("[DEBUG] non-zero exit status: %d", exitErr.ExitStatus())
+			// Otherwise, we have an ExitError, meaning we can just read the
+			// exit status
+			log.Printf("[DEBUG] non-zero exit status: %d, %v", exitErr.ExitStatus(), err)
 			stdoutB, err := ioutil.ReadAll(stdoutR)
 			if err != nil {
 				return err
@@ -833,7 +834,6 @@ func (c *comm) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) er
 		return err
 	}
 
-	log.Printf("[DEBUG] scp stderr (length %d): %s", stderr.Len(), stderr.String())
 	return nil
 }
 
@@ -894,7 +894,7 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader, fi *
 		if _, err := io.Copy(tf, src); err != nil {
 			return fmt.Errorf("Error copying input data into local temporary "+
 				"file. Check that TEMPDIR has enough space. Please see "+
-				"https://www.packer.io/docs/other/environment-variables.html#tmpdir"+
+				"https://www.packer.io/docs/other/environment-variables#tmpdir"+
 				"for more info. Error: %s", err)
 		}
 
