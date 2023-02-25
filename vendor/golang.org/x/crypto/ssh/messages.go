@@ -97,6 +97,36 @@ type kexDHReplyMsg struct {
 	Signature []byte
 }
 
+// See RFC 4419, section 5.
+const msgKexDHGexGroup = 31
+
+type kexDHGexGroupMsg struct {
+	P *big.Int `sshtype:"31"`
+	G *big.Int
+}
+
+const msgKexDHGexInit = 32
+
+type kexDHGexInitMsg struct {
+	X *big.Int `sshtype:"32"`
+}
+
+const msgKexDHGexReply = 33
+
+type kexDHGexReplyMsg struct {
+	HostKey   []byte `sshtype:"33"`
+	Y         *big.Int
+	Signature []byte
+}
+
+const msgKexDHGexRequest = 34
+
+type kexDHGexRequestMsg struct {
+	MinBits      uint32 `sshtype:"34"`
+	PreferedBits uint32
+	MaxBits      uint32
+}
+
 // See RFC 4253, section 10.
 const msgServiceRequest = 5
 
@@ -109,6 +139,14 @@ const msgServiceAccept = 6
 
 type serviceAcceptMsg struct {
 	Service string `sshtype:"6"`
+}
+
+// See RFC 8308, section 2.3
+const msgExtInfo = 7
+
+type extInfoMsg struct {
+	NumExtensions uint32 `sshtype:"7"`
+	Payload       []byte `ssh:"rest"`
 }
 
 // See RFC 4252, section 5.
@@ -150,11 +188,11 @@ const msgUserAuthInfoRequest = 60
 const msgUserAuthInfoResponse = 61
 
 type userAuthInfoRequestMsg struct {
-	User               string `sshtype:"60"`
-	Instruction        string
-	DeprecatedLanguage string
-	NumPrompts         uint32
-	Prompts            []byte `ssh:"rest"`
+	Name        string `sshtype:"60"`
+	Instruction string
+	Language    string
+	NumPrompts  uint32
+	Prompts     []byte `ssh:"rest"`
 }
 
 // See RFC 4254, section 5.1.
@@ -752,6 +790,8 @@ func decode(packet []byte) (interface{}, error) {
 		msg = new(serviceRequestMsg)
 	case msgServiceAccept:
 		msg = new(serviceAcceptMsg)
+	case msgExtInfo:
+		msg = new(extInfoMsg)
 	case msgKexInit:
 		msg = new(kexInitMsg)
 	case msgKexDHInit:
@@ -813,6 +853,7 @@ var packetTypeNames = map[byte]string{
 	msgDisconnect:          "disconnectMsg",
 	msgServiceRequest:      "serviceRequestMsg",
 	msgServiceAccept:       "serviceAcceptMsg",
+	msgExtInfo:             "extInfoMsg",
 	msgKexInit:             "kexInitMsg",
 	msgKexDHInit:           "kexDHInitMsg",
 	msgKexDHReply:          "kexDHReplyMsg",
